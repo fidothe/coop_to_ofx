@@ -1,0 +1,1 @@
+require 'coop_scraper/credit_card'
