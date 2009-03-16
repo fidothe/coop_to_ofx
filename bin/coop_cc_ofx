@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+$:.push(File.expand_path(File.dirname(__FILE__) + '/../lib'))
+
+require 'coop_scraper/credit_card'
+
+input_path = ARGV[0]
+raise ArgumentError, "Argument must be a real file!" unless File.file?(ARGV[0])
+puts "Processing #{input_path}"
+create_time = File.stat(input_path).ctime
+
+output_file_path = File.dirname(input_path) + "/#{File.basename(input_path, '.html')}.ofx"
+
+statement = CoopScraper::CreditCard.generate_statement(File.open(input_path), create_time)
+File.open(output_file_path, 'w') { |f| f.write(statement.serialise) }
+puts "Output: #{output_file_path}"

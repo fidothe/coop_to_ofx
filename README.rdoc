@@ -1,0 +1,23 @@
+Convert statement HTML from the Co-operative bank's online banking system to OFX for import into financial apps.
+
+= Usage
+
+For a Current Account:
+
+1. Save the HTML source of the statement page.
+
+  /path/to/coop_curr_ofx /path/to/statement.html
+  
+Will produce /path/to/statement.ofx
+
+For a Credit Card:
+
+1. Save the HTML source of the statement page
+
+  /path/to/coop_cc_ofx /path/to/statement.html
+  
+Will produce /path/to/statement.ofx
+
+== To do
+
+This will be gemified once I've sorted out some of the problems with XML validation of output against the specs

@@ -9,8 +9,8 @@ require 'ofx'
 require 'coop_scraper'
 require 'hpricot'
 
-def fixture_path(fixture_filename)
-  File.dirname(__FILE__) + '/fixtures/' + fixture_filename
+def full_fixture_path(fixture_dir, fixture_filename)
+  File.dirname(__FILE__) + "/fixtures/#{fixture_dir}/" + fixture_filename
 end
 
 def read_fixture(fixture_filename)

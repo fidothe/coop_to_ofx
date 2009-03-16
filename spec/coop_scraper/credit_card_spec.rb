@@ -1,25 +1,29 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe CoopScraper::CreditCard do
+  def fixture_path(fixture_file_name)
+    full_fixture_path('credit_card', fixture_file_name)
+  end
+  
   describe "parsing the html components" do
-    def fixture_doc
-      @fixture_doc ||= open(fixture_path('cc_statement_fixture.html')) { |f| Hpricot(f) }
+    def fixture_doc(fixture_file_name = 'cc_statement_fixture.html')
+      open(fixture_path(fixture_file_name)) { |f| Hpricot(f) }
     end
     
     def fixture_with_interest_line_doc
-      @fixture_with_interest_line_doc ||= open(fixture_path('statement_with_interest_line_fixture.html')) { |f| Hpricot(f) }
+      fixture_doc('statement_with_interest_line_fixture.html')
     end
     
     def normal_transaction_fixture_doc
-      @normal_transaction_fixture_doc ||= open(fixture_path('normal_transaction_fixture.html')) { |f| Hpricot(f) }
+      fixture_doc('normal_transaction_fixture.html')
     end
     
     def payment_in_transaction_fixture_doc
-      @payment_in_transaction_fixture_doc ||= open(fixture_path('payment_in_transaction_fixture.html')) { |f| Hpricot(f) }
+      fixture_doc('payment_in_transaction_fixture.html')
     end
     
     def foreign_transaction_fixture_doc
-      @foreign_transaction_fixture_doc ||= open(fixture_path('foreign_transaction_fixture.html')) { |f| Hpricot(f) }
+      fixture_doc('foreign_transaction_fixture.html')
     end
     
     describe "making Ruby dates from Co-op dates" do
@@ -46,16 +50,23 @@ describe CoopScraper::CreditCard do
     
     describe "extracting transactions" do
       it "should find the correct number of transactions" do
-        CoopScraper::CreditCard.extract_transactions(fixture_doc).size.should == 57
+        mock_statement = mock('OFX::Statement')
+        mock_statement.stubs(:date).returns(Time.utc('2009', '2', '3'))
+        CoopScraper::CreditCard.extract_transactions(fixture_doc, mock_statement).size.should == 57
       end
       
       it "should create OFX::Statement::Transaction objects for the transactions" do
-        CoopScraper::CreditCard.extract_transactions(fixture_doc).first.should be_instance_of(OFX::Statement::Transaction)
+        mock_statement = mock('OFX::Statement')
+        mock_statement.stubs(:date).returns(Time.utc('2009', '2', '3'))
+        CoopScraper::CreditCard.extract_transactions(fixture_doc, mock_statement).first.
+          should be_instance_of(OFX::Statement::Transaction)
       end
       
       describe "processing a normal transaction" do
-        before(:each) do
-          transactions = CoopScraper::CreditCard.extract_transactions(normal_transaction_fixture_doc)
+        before(:all) do
+          mock_statement = mock('OFX::Statement')
+          mock_statement.stubs(:date).returns(Time.utc('2009', '2', '3'))
+          transactions = CoopScraper::CreditCard.extract_transactions(normal_transaction_fixture_doc, mock_statement)
           transactions.size.should == 1
           @transaction = transactions.first
         end
@@ -74,8 +85,10 @@ describe CoopScraper::CreditCard do
       end
       
       describe "processing a transaction where money was put in" do
-        before(:each) do
-          transactions = CoopScraper::CreditCard.extract_transactions(payment_in_transaction_fixture_doc)
+        before(:all) do
+          mock_statement = mock('OFX::Statement')
+          mock_statement.stubs(:date).returns(Time.utc('2009', '2', '3'))
+          transactions = CoopScraper::CreditCard.extract_transactions(payment_in_transaction_fixture_doc, mock_statement)
           transactions.size.should == 1
           @transaction = transactions.first
         end
@@ -94,8 +107,10 @@ describe CoopScraper::CreditCard do
       end
       
       describe "processing a transaction with an additional row for currency conversion" do
-        before(:each) do
-          transactions = CoopScraper::CreditCard.extract_transactions(foreign_transaction_fixture_doc)
+        before(:all) do
+          mock_statement = mock('OFX::Statement')
+          mock_statement.stubs(:date).returns(Time.utc('2009', '2', '3'))
+          transactions = CoopScraper::CreditCard.extract_transactions(foreign_transaction_fixture_doc, mock_statement)
           transactions.size.should == 1
           @transaction = transactions.first
         end
@@ -118,26 +133,38 @@ describe CoopScraper::CreditCard do
       end
       
       it "should ignore estimated interest lines" do
-        transactions = CoopScraper::CreditCard.extract_transactions(fixture_with_interest_line_doc)
+        mock_statement = mock('OFX::Statement')
+        mock_statement.stubs(:date).returns(Time.utc('2009', '2', '3'))
+        transactions = CoopScraper::CreditCard.extract_transactions(fixture_with_interest_line_doc, mock_statement)
         transactions.size.should == 1
         transactions.first.should_not have_memo
+      end
+      
+      describe "processing an overlimit charge line" do
+        before(:all) do
+          mock_statement = mock('OFX::Statement')
+          mock_statement.stubs(:date).returns(Time.utc('2009', '2', '3'))
+          transactions = CoopScraper::CreditCard.extract_transactions(fixture_doc('overlimit_charge_fixture.html'), mock_statement)
+          transactions.size.should == 2
+          @transaction = transactions.last
+        end
+        
+        it "should be the overlimit charge" do
+          @transaction.name.should == 'OVERLIMIT CHARGE'
+        end
+        
+        it "should pick up the statement date" do
+          @transaction.date.should == Time.utc('2009', '2', '3')
+        end
+        
+        it "should have the right trntype" do
+          @transaction.trntype.should == :service_charge
+        end
       end
     end
   end
   
   describe "creating the statement object" do
-    # def convert_statement(html_statement_io, server_response_time)
-    #   doc = Hpricot(html_statement_io)
-    #   
-    #   account_number = extract_account_number(doc)
-    #   statement_date = time_to_ofx_dta(extract_statement_date(doc))
-    #   statement_balance = extract_statement_balance(doc)
-    #   available_credit = extract_available_credit(doc)
-    #   
-    #   transactions = extract_transactions(doc)
-    #   
-    #   statement_start = transactions.first[:date]
-    #   statement_end = transactions.last[:date]
     before(:each) do
       fixture = open(fixture_path('cc_statement_fixture.html'))
       @statement = CoopScraper::CreditCard.generate_statement(fixture, Time.utc('2009', '3', '6'))
@@ -160,7 +187,7 @@ describe CoopScraper::CreditCard do
     end
     
     it "should have the correct statement end date" do
-      @statement.end_date.should == Time.utc('2009', '2', '2')
+      @statement.end_date.should == Time.utc('2009', '2', '3')
     end
     
     it "should have the correct balance" do
