@@ -1,8 +1,10 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../../spec_helper')
 
 describe OFX::Statement::Output::CurrentAccount do
-  
   describe "generating OFX" do
+    before(:each) do
+      @output = OFX::Statement::Output::CurrentAccount.new
+    end
     describe "components" do
       before(:each) do
         @builder = Builder::XmlMarkup.new
@@ -10,14 +12,14 @@ describe OFX::Statement::Output::CurrentAccount do
       
       describe "bank account message set wrapper" do
         it "should be able to generate the correct bank account message set element" do
-          OFX::Statement::Output::CurrentAccount.message_set_block(@builder)
+          @output.message_set_block(@builder)
           output = Hpricot(@builder.target!)
           
           output.at('/BANKMSGSETV1').should_not be_nil
         end
         
         it "should yield a child node builder so that document generation can continue" do
-          OFX::Statement::Output::CurrentAccount.message_set_block(@builder) { |node| node.fnord }
+          @output.message_set_block(@builder) { |node| node.fnord }
           output = Hpricot(@builder.target!)
           
           output.at('/BANKMSGSETV1/fnord').should_not be_nil
@@ -34,7 +36,7 @@ describe OFX::Statement::Output::CurrentAccount do
         end
         
         it "should be able to generate the correct Statement block" do
-          OFX::Statement::Output::CurrentAccount.statement_block(@builder, @statement)
+          @output.statement_block(@builder, @statement)
           output = Hpricot(@builder.target!)
           
           output.at('/STMTTRNRS/STMTRS/CURDEF').should_not be_nil
@@ -51,7 +53,7 @@ describe OFX::Statement::Output::CurrentAccount do
         end
         
         it "should yield a child node builder so that document generation can continue" do
-          OFX::Statement::Output::CurrentAccount.statement_block(@builder, @statement) { |node| node.fnord }
+          @output.statement_block(@builder, @statement) { |node| node.fnord }
           output = Hpricot(@builder.target!)
           
           output.at('/STMTTRNRS/STMTRS/BANKTRANLIST/fnord').should_not be_nil
@@ -69,10 +71,8 @@ describe OFX::Statement::Output::CurrentAccount do
         statement.ledger_balance = "-1551.90"
         statement.sort_code = "089273"
         statement << transaction
-
-        builder = ::Builder::XmlMarkup.new
-
-        output_doc = Hpricot(OFX::Statement::Output::CurrentAccount.serialise(builder, statement).target!)
+        
+        output_doc = Hpricot(@output.serialise(statement))
         output_doc.search('/OFX/SIGNONMSGSRSV1/SONRS/STATUS/CODE').should_not be_empty
         output_doc.search('/OFX/SIGNONMSGSRSV1/BANKMSGSETV1/STMTTRNRS/STMTRS/BANKTRANLIST/STMTTRN/TRNAMT').should_not be_empty
       end

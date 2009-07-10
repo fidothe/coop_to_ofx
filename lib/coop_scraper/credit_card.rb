@@ -31,6 +31,8 @@ module CoopScraper
         case details
         when /^OVERLIMIT CHARGE$/
           :service_charge
+        when /^MERCHANDISE INTEREST AT [0-9]+\.[0-9]+% PER MTH$/
+          :interest
         else
           nil
         end
@@ -41,7 +43,7 @@ module CoopScraper
         current_transaction = {}
         doc.search('tbody.contents tr').each do |statement_row|
           date = statement_row.at('td.dataRowL').inner_text
-          unless date == "?"
+          unless date == "?" || date[0] == 194
             current_transaction = extract_transaction(statement_row, coop_date_to_time(date))
             transactions << current_transaction
           else

@@ -2,9 +2,21 @@ require File.expand_path(File.dirname(__FILE__) + '/../../../spec_helper')
 
 describe OFX::Statement::Output::Base do
   before(:all) do
-    klass = Class.new
-    klass.class_eval { include OFX::Statement::Output::Base }
-    @base = klass.new
+    @base = OFX::Statement::Output::Base.new
+  end
+  
+  describe "creating a builder" do
+    it "should pick the right output mechanism for OFX 1 when asked" do
+      @base.create_builder(:ofx1).should be_instance_of(OFX::Statement::Output::Builder::OFX1)
+    end
+    
+    it "should pick the right output mechanism for OFX 2 when asked" do
+      @base.create_builder(:ofx2).should be_instance_of(OFX::Statement::Output::Builder::OFX2)
+    end
+    
+    it "should pick OFX 2 by default" do
+      @base.create_builder.should be_instance_of(OFX::Statement::Output::Builder::OFX2)
+    end
   end
   
   describe "outputting OFX" do
@@ -58,17 +70,6 @@ describe OFX::Statement::Output::Base do
     describe "components" do
       before(:each) do
         @builder = Builder::XmlMarkup.new
-      end
-      
-      it "should be able to generate the right PI" do
-        @base.ofx_pi(@builder)
-        pi = @builder.target!.strip
-        pi.should match(/^<\?OFX/)
-        pi.should match(/OFXHEADER="200"/)
-        pi.should match(/VERSION="203"/)
-        pi.should match(/SECURITY="NONE"/)
-        pi.should match(/OLDFILEUID="NONE"/)
-        pi.should match(/NEWFILEUID="NONE"/)
       end
       
       describe "OFX wrapper" do
@@ -193,6 +194,55 @@ describe OFX::Statement::Output::Base do
           output.at('/STMTTRN/NAME').inner_text.should == "A nice thing wot I bought"
           output.at('/STMTTRN/MEMO').inner_text.should == "plenty USD wonga"
         end
+      end
+    end
+    
+    describe "serialising" do
+      before(:each) do
+        @base.stubs(:ofx_block)
+      end
+      
+      it "should pass through format correctly" do
+        stub_builder = stub('Builder')
+        stub_builder.stubs(:ofx_stanza!)
+        stub_builder.stubs(:target!)
+        @base.expects(:create_builder).with(:format).returns(stub_builder)
+        
+        @base.serialise(nil, :format)
+      end
+      
+      it "should invoke ofx_stanza! on the builder" do
+        mock_builder = mock('Builder')
+        @base.stubs(:create_builder).with(:format).returns(mock_builder)
+        mock_builder.stubs(:target!)
+        
+        mock_builder.expects(:ofx_stanza!)
+        
+        @base.serialise(nil, :format)
+      end
+      
+      it "should invoke ofx_block passing in builder" do
+        stub_builder = stub('Builder')
+        @base.stubs(:create_builder).with(:format).returns(stub_builder)
+        stub_builder.stubs(:ofx_stanza!)
+        stub_builder.stubs(:target!)
+        
+        @base.expects(:ofx_block).with(stub_builder)
+        
+        
+        @base.serialise(:statement, :format)
+      end
+      
+      it "should return a string" do
+        stub_builder = stub('Builder')
+        @base.stubs(:create_builder).with(:format).returns(stub_builder)
+        @base.stubs(:ofx_block).with(stub_builder)
+        stub_builder.stubs(:ofx_stanza!)
+        
+        stub_builder.expects(:target!).returns("output")
+        
+        
+        @base.serialise(:statement, :format).should == "output"
       end
     end
   end

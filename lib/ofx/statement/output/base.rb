@@ -1,7 +1,9 @@
+require 'ofx/statement/output/builder'
+
 module OFX
   module Statement
     module Output
-      module Base
+      class Base
         class << self
           # See OFX 2.0.3 spec, section 11.4.3.1 "Transaction types used in <TRNTYPE>"
           def trntype_hash
@@ -29,6 +31,23 @@ module OFX
           end
         end
         
+        def serialise(statement, format = :ofx2)
+          builder = create_builder(format)
+          builder.ofx_stanza!
+          ofx_block(builder) do |ofx|
+            signon_block(ofx, statement) do |signon|
+              message_set_block(signon) do |message_set|
+                statement_block(message_set, statement) do |stmnt|
+                  statement.transactions.each do |transaction|
+                    transaction_block(stmnt, transaction)
+                  end
+                end
+              end
+            end
+          end
+          builder.target!
+        end
+        
         def fitid_hash
           @fitid_hash ||= {}
         end
@@ -51,13 +70,9 @@ module OFX
           output
         end
         
-        def ofx_pi(node)
-          node.instruct! :OFX, :OFXHEADER => "200", :VERSION => "203", :SECURITY => "NONE", 
-                               :OLDFILEUID => "NONE", :NEWFILEUID => "NONE"
-        end
-        
         def ofx_block(node)
           return node.OFX unless block_given?
+          
           node.OFX { |child| yield(child) }
         end
         
@@ -101,21 +116,13 @@ module OFX
           end
         end
         
-        def serialise(builder, statement)
-          builder.instruct!
-          ofx_pi(builder)
-          ofx_block(builder) do |ofx|
-            signon_block(ofx, statement) do |signon|
-              message_set_block(signon) do |message_set|
-                statement_block(message_set, statement) do |stmnt|
-                  statement.transactions.each do |transaction|
-                    transaction_block(stmnt, transaction)
-                  end
-                end
-              end
-            end
+        def create_builder(format = :ofx2)
+          case format
+          when :ofx1
+            OFX::Statement::Output::Builder::OFX1.new(:indent => 2)
+          when :ofx2
+            OFX::Statement::Output::Builder::OFX2.new(:indent => 2)
           end
-          builder
         end
       end
     end

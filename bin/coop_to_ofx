@@ -1,0 +1,60 @@
+#!/usr/bin/env ruby
+
+$:.push(File.expand_path(File.dirname(__FILE__) + '/../lib'))
+require 'optparse'
+require 'coop_scraper/version'
+
+options = {:format => :ofx2, :statement_type => :credit}
+OptionParser.new do |opts|
+  opts.banner = "Usage: coop_to_ofx [[--ofx1 | --ofx2] [--current | --credit]] /path/to/statement.html"
+  
+  opts.on("--ofx1", "Generate OFX 1 SGML output") do |format|
+    options[:format] = :ofx1
+  end
+  
+  opts.on("--ofx2", "Generate OFX 2 XML output (the default)") do |format|
+    options[:format] = :ofx1
+  end
+  
+  opts.on("--current", "Process Current account statements") do |statement_type|
+    options[:statement_type] = :current
+  end
+  
+  opts.on("--credit", "Process Credit Card account statements (the default)") do |statement_type|
+    options[:statement_type] = :credit
+  end
+  
+  opts.separator ""
+  opts.separator "Common options:"
+  
+  # No argument, shows at tail.  This will print an options summary.
+  # Try it and see!
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+  
+  # Another typical switch to print the version.
+  opts.on_tail("--version", "Show version") do
+    puts CoopScraper::Version()
+    puts "Copyright (c) 2009, Matt Patterson. Released under the MIT license"
+    exit
+  end
+end.parse!
+
+input_path = ARGV[0]
+raise ArgumentError, "Argument must be a real file!" unless File.file?(ARGV[0])
+create_time = File.stat(input_path).ctime
+
+output_file_path = File.dirname(input_path) + "/#{File.basename(input_path, '.html')}.ofx"
+
+if options[:statement_type] == :credit
+  require 'coop_scraper/credit_card'
+  scraper_class = CoopScraper::CreditCard
+else
+  require 'coop_scraper/current_account'
+  scraper_class = CoopScraper::CurrentAccount
+end
+
+statement = scraper_class.generate_statement(File.open(input_path), create_time)
+File.open(output_file_path, 'w') { |f| f.write(statement.serialise(options[:format])) }

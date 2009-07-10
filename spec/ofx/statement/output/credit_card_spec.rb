@@ -1,8 +1,11 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../../spec_helper')
 
 describe OFX::Statement::Output::CreditCard do
-  
   describe "generating OFX" do
+    before(:each) do
+      @output = OFX::Statement::Output::CreditCard.new
+    end
+    
     describe "components" do
       before(:each) do
         @builder = Builder::XmlMarkup.new
@@ -10,14 +13,14 @@ describe OFX::Statement::Output::CreditCard do
       
       describe "credit card message set wrapper" do
         it "should be able to generate the correct OFX root element" do
-          OFX::Statement::Output::CreditCard.message_set_block(@builder)
+          @output.message_set_block(@builder)
           output = Hpricot(@builder.target!)
           
           output.at('/CREDITCARDMSGSETV1').should_not be_nil
         end
         
         it "should yield a child node builder so that document generation can continue" do
-          OFX::Statement::Output::CreditCard.message_set_block(@builder) { |node| node.fnord }
+          @output.message_set_block(@builder) { |node| node.fnord }
           output = Hpricot(@builder.target!)
           
           output.at('/CREDITCARDMSGSETV1/fnord').should_not be_nil
@@ -34,7 +37,7 @@ describe OFX::Statement::Output::CreditCard do
         end
         
         it "should be able to generate the correct Statement block" do
-          OFX::Statement::Output::CreditCard.statement_block(@builder, @statement)
+          @output.statement_block(@builder, @statement)
           output = Hpricot(@builder.target!)
           
           output.at('/CCSTMTTRNRS/CCSTMTRS/CURDEF').should_not be_nil
@@ -53,7 +56,7 @@ describe OFX::Statement::Output::CreditCard do
         end
         
         it "should yield a child node builder so that document generation can continue" do
-          OFX::Statement::Output::CreditCard.statement_block(@builder, @statement) { |node| node.fnord }
+          @output.statement_block(@builder, @statement) { |node| node.fnord }
           output = Hpricot(@builder.target!)
           
           output.at('/CCSTMTTRNRS/CCSTMTRS/BANKTRANLIST/fnord').should_not be_nil
@@ -73,9 +76,7 @@ describe OFX::Statement::Output::CreditCard do
       statement.available_credit = "305.00"
       statement << transaction
       
-      builder = ::Builder::XmlMarkup.new
-      
-      output_doc = Hpricot(OFX::Statement::Output::CreditCard.serialise(builder, statement).target!)
+      output_doc = Hpricot(@output.serialise(statement))
       output_doc.search('/OFX/SIGNONMSGSRSV1/SONRS/STATUS/CODE').should_not be_empty
       output_doc.search('/OFX/SIGNONMSGSRSV1/CREDITCARDMSGSETV1/CCSTMTTRNRS/CCSTMTRS/BANKTRANLIST/STMTTRN/TRNAMT').should_not be_empty
     end

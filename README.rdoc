@@ -6,7 +6,7 @@ For a Current Account:
 
 1. Save the HTML source of the statement page.
 
-  /path/to/coop_curr_ofx /path/to/statement.html
+  /path/to/coop_to_ofx --current /path/to/statement.html
   
 Will produce /path/to/statement.ofx
 
@@ -14,10 +14,25 @@ For a Credit Card:
 
 1. Save the HTML source of the statement page
 
-  /path/to/coop_cc_ofx /path/to/statement.html
+  /path/to/coop_to_ofx /path/to/statement.html
+
+Or
+
+  /path/to/coop_to_ofx --credit /path/to/statement.html
   
 Will produce /path/to/statement.ofx
 
+
+To produce OFX 1 SGML (rather than OFX 2 XML):
+
+  /path/to/coop_to_ofx --ofx1 /path/to/statement.html
+  /path/to/coop_to_ofx --ofx1 --current /path/to/statement.html
+
+To show all the options:
+
+  coop_to_ofx --help 
+
+
 == To do
 
-This will be gemified once I've sorted out some of the problems with XML validation of output against the specs
+XML / SGML validation of output against the specs

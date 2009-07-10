@@ -26,10 +26,8 @@ describe CoopScraper::CreditCard do
       fixture_doc('foreign_transaction_fixture.html')
     end
     
-    describe "making Ruby dates from Co-op dates" do
-      it "should be able to turn a DD/MM/YYYY string into a YYYYMMDD one" do
-        CoopScraper::CreditCard.coop_date_to_time('03/02/2009').should == Time.utc('2009', '2', '3')
-      end
+    def interest_transaction_fixture_doc
+      fixture_doc('interest_transaction_fixture.html')
     end
     
     it "should be able to extract the statement date" do
@@ -159,6 +157,32 @@ describe CoopScraper::CreditCard do
         
         it "should have the right trntype" do
           @transaction.trntype.should == :service_charge
+        end
+      end
+      
+      describe "processing a transaction for credit card interest" do
+        before(:all) do
+          mock_statement = mock('OFX::Statement')
+          mock_statement.stubs(:date).returns(Time.utc('2009', '2', '3'))
+          transactions = CoopScraper::CreditCard.extract_transactions(interest_transaction_fixture_doc, mock_statement)
+          transactions.size.should == 1
+          @transaction = transactions.first
+        end
+        
+        it "should pull out the date" do
+          @transaction.date.should == Time.utc('2009', '5', '5')
+        end
+        
+        it "should pull out the amount" do
+          @transaction.amount.should == '-40.58'
+        end
+        
+        it "should pull out the details" do
+          @transaction.name.should == 'MERCHANDISE INTEREST AT 1.667% PER MTH'
+        end
+        
+        it "should have the right trntype" do
+          @transaction.trntype.should == :interest
         end
       end
     end

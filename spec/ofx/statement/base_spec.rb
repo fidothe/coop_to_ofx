@@ -6,10 +6,6 @@ describe OFX::Statement::Base do
       @statement = OFX::Statement::Base.new
     end
     
-    it "should provide an XML builder object" do
-      @statement.builder.should respond_to(:target!)
-    end
-    
     describe "setting the data" do
       describe "server response time" do
         it "should allow the server response time to be set" do
