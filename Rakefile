@@ -2,6 +2,7 @@ require 'rake'
 require 'rake/rdoctask'
 gem 'rspec'
 require 'spec/rake/spectask'
+require 'lib/coop_scraper/version.rb'
 
 desc 'Generate documentation for Co-op-to-OFX.'
 Rake::RDocTask.new(:rdoc) do |rdoc|
@@ -50,25 +51,26 @@ spec = Gem::Specification.new do |s|
   
   # Change these as appropriate
   s.name              = "coop_to_ofx"
-  s.version           = "0.1.0"
-  s.summary           = "What this thing does"
-  s.author            = "Your name"
-  s.email             = "you@example.com"
-  s.homepage          = "http://example.com"
+  s.version           = CoopScraper::Version()
+  s.summary           = "Convert Co-operative bank HTML statements into OFX"
+  s.author            = "Matt Patterson"
+  s.email             = "matt@reprocessed.org"
+  s.homepage          = "http://reprocessed.org/"
 
   s.has_rdoc          = true
   s.extra_rdoc_files  = %w(README.rdoc)
   s.rdoc_options      = %w(--main README.rdoc)
 
   # Add any extra files to include in the gem
-  s.files             = %w(OFX 2.0.3 Schema.zip OFX 2.1.1 schema.zip OFX 203.pdf Rakefile README.rdoc sample_data.ofx) + Dir.glob("{bin,spec,lib}/**/*")
+  s.files             = %w(Rakefile README.rdoc) + Dir.glob("{bin,spec,lib}/**/*")
   s.executables       = FileList["bin/**"].map { |f| File.basename(f) }
    
   s.require_paths     = ["lib"]
   
   # If you want to depend on other gems, add them here, along with any
   # relevant versions
-  # s.add_dependency("some_other_gem", "~> 0.1.0")
+  s.add_dependency("hpricot", "~> 0.6.0")
+  s.add_dependency("builder", "~> 2.1.0")
   
   s.add_development_dependency("rspec") # add any other gems for testing/development
 
