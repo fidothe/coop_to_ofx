@@ -53,6 +53,7 @@ spec = Gem::Specification.new do |s|
   s.name              = "coop_to_ofx"
   s.version           = CoopScraper::Version()
   s.summary           = "Convert Co-operative bank HTML statements into OFX"
+  s.description       = File.read('README.rdoc')
   s.author            = "Matt Patterson"
   s.email             = "matt@reprocessed.org"
   s.homepage          = "http://reprocessed.org/"

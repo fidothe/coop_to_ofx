@@ -8,6 +8,44 @@ Gem::Specification.new do |s|
   s.authors = ["Matt Patterson"]
   s.date = %q{2009-07-10}
   s.default_executable = %q{coop_to_ofx}
+  s.description = %q{Convert statement HTML from the Co-operative bank's online banking system to OFX for import into financial apps.
+
+= Usage
+
+For a Current Account:
+
+1. Save the HTML source of the statement page.
+
+  coop_to_ofx --current /path/to/statement.html
+  
+Will produce /path/to/statement.ofx
+
+For a Credit Card:
+
+1. Save the HTML source of the statement page
+
+  coop_to_ofx /path/to/statement.html
+
+Or
+
+  coop_to_ofx --credit /path/to/statement.html
+  
+Will produce /path/to/statement.ofx
+
+
+To produce OFX 1 SGML (rather than OFX 2 XML):
+
+  coop_to_ofx --ofx1 /path/to/statement.html
+  coop_to_ofx --ofx1 --current /path/to/statement.html
+
+To show all the options:
+
+  coop_to_ofx --help 
+
+
+== To do
+
+XML / SGML validation of output against the specs}
   s.email = %q{matt@reprocessed.org}
   s.executables = ["coop_to_ofx"]
   s.extra_rdoc_files = ["README.rdoc"]
