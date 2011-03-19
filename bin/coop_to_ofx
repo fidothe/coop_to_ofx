@@ -6,7 +6,7 @@ require 'coop_scraper/version'
 
 options = {:format => :ofx2, :statement_type => :credit}
 OptionParser.new do |opts|
-  opts.banner = "Usage: coop_to_ofx [[--ofx1 | --ofx2] [--current | --credit]] /path/to/statement.html"
+  opts.banner = "Usage: coop_to_ofx [[--ofx1 | --ofx2] [--current | --savings | --credit]] /path/to/statement.html"
   
   opts.on("--ofx1", "Generate OFX 1 SGML output") do |format|
     options[:format] = :ofx1
@@ -18,6 +18,10 @@ OptionParser.new do |opts|
   
   opts.on("--current", "Process Current account statements") do |statement_type|
     options[:statement_type] = :current
+  end
+  
+  opts.on("--savings", "Process Savings account statements") do |statement_type|
+    options[:statement_type] = :savings
   end
   
   opts.on("--credit", "Process Credit Card account statements (the default)") do |statement_type|
@@ -51,6 +55,9 @@ output_file_path = File.dirname(input_path) + "/#{File.basename(input_path, '.ht
 if options[:statement_type] == :credit
   require 'coop_scraper/credit_card'
   scraper_class = CoopScraper::CreditCard
+elsif options[:statement_type] == :savings
+  require 'coop_scraper/savings_account'
+  scraper_class = CoopScraper::SavingsAccount
 else
   require 'coop_scraper/current_account'
   scraper_class = CoopScraper::CurrentAccount

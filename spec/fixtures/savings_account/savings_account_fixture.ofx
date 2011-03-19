@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?OFX SECURITY="NONE" OLDFILEUID="NONE" NEWFILEUID="NONE" VERSION="203" OFXHEADER="200"?>
+<OFX>
+  <SIGNONMSGSRSV1>
+    <SONRS>
+      <STATUS>
+        <CODE>0</CODE>
+        <SEVERITY>INFO</SEVERITY>
+      </STATUS>
+      <DTSERVER>20090306161604</DTSERVER>
+      <LANGUAGE>ENG</LANGUAGE>
+    </SONRS>
+    <BANKMSGSETV1>
+      <STMTTRNRS>
+        <STMTRS>
+          <CURDEF>GBP</CURDEF>
+          <BANKACCTFROM>
+            <BANKID>089273</BANKID>
+            <ACCTID>12341234</ACCTID>
+            <ACCTTYPE>SAVINGS</ACCTTYPE>
+          </BANKACCTFROM>
+          <BANKTRANLIST>
+            <DTSTART>20080929</DTSTART>
+            <DTEND>20081003</DTEND>
+            <STMTTRN>
+              <TRNTYPE>DEBIT</TRNTYPE>
+              <DTPOSTED>20080929</DTPOSTED>
+              <TRNAMT>-20.00</TRNAMT>
+              <FITID>200809291</FITID>
+              <NAME>LINK    10:51SEP28</NAME>
+            </STMTTRN>
+            <STMTTRN>
+              <TRNTYPE>DEBIT</TRNTYPE>
+              <DTPOSTED>20080929</DTPOSTED>
+              <TRNAMT>-104.83</TRNAMT>
+              <FITID>200809292</FITID>
+              <NAME>T-MOBILE           A PHONE BILL</NAME>
+            </STMTTRN>
+            <STMTTRN>
+              <TRNTYPE>DEBIT</TRNTYPE>
+              <DTPOSTED>20080930</DTPOSTED>
+              <TRNAMT>-20.00</TRNAMT>
+              <FITID>200809301</FITID>
+              <NAME>LINK    10:11SEP30</NAME>
+            </STMTTRN>
+            <STMTTRN>
+              <TRNTYPE>CREDIT</TRNTYPE>
+              <DTPOSTED>20081001</DTPOSTED>
+              <TRNAMT>100.00</TRNAMT>
+              <FITID>200810011</FITID>
+              <NAME>TFR 92732345234500</NAME>
+            </STMTTRN>
+            <STMTTRN>
+              <TRNTYPE>DEBIT</TRNTYPE>
+              <DTPOSTED>20081002</DTPOSTED>
+              <TRNAMT>-10.00</TRNAMT>
+              <FITID>200810021</FITID>
+              <NAME>LINK    10:07OCT02</NAME>
+            </STMTTRN>
+            <STMTTRN>
+              <TRNTYPE>DEBIT</TRNTYPE>
+              <DTPOSTED>20081003</DTPOSTED>
+              <TRNAMT>-20.00</TRNAMT>
+              <FITID>200810031</FITID>
+              <NAME>LINK    06:20OCT03</NAME>
+            </STMTTRN>
+            <STMTTRN>
+              <TRNTYPE>CREDIT</TRNTYPE>
+              <DTPOSTED>20081003</DTPOSTED>
+              <TRNAMT>200.00</TRNAMT>
+              <FITID>200810032</FITID>
+              <NAME>SOME MONEY</NAME>
+            </STMTTRN>
+          </BANKTRANLIST>
+          <LEDGERBAL>
+            <BALAMT>219.92</BALAMT>
+            <DTASOF>20081003</DTASOF>
+          </LEDGERBAL>
+        </STMTRS>
+      </STMTTRNRS>
+    </BANKMSGSETV1>
+  </SIGNONMSGSRSV1>
+</OFX>
