@@ -20,6 +20,14 @@ For a Current Account:
   
 Will produce /path/to/statement.ofx
 
+For a Savings Account:
+
+1. Save the HTML source of the statement page.
+
+  coop_to_ofx --savings /path/to/statement.html
+  
+Will produce /path/to/statement.ofx
+
 For a Credit Card:
 
 1. Save the HTML source of the statement page
